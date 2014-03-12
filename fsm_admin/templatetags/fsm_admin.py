@@ -35,3 +35,19 @@ def fsm_submit_row(context):
     ctx['perms'] = context['perms']
 
     return ctx
+
+
+@register.inclusion_tag('fsm_admin/fsm_transition_hints.html', takes_context=True)
+def fsm_transition_hints(context):
+    """
+    Displays hints about why a state transition might not be applicable for
+    this the model.
+    """
+    original = context.get('original', None)
+    if not original:
+        return {}
+
+    model_admin = context.get('adminform').model_admin
+    return {
+        'transition_hints': model_admin.get_transition_hints(original)
+    }

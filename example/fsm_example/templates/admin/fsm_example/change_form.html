@@ -3,3 +3,8 @@
 
 
 {% block submit_buttons_bottom %}{% fsm_submit_row %}{% endblock %}
+
+{% block after_field_sets %}
+    {{ block.super }}
+    {% block transition_hints %}{% fsm_transition_hints %}{% endblock %}
+{% endblock %} 

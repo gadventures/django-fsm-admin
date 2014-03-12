@@ -2,6 +2,7 @@
 <footer class="grp-module grp-submit-row grp-fixed-footer">
     <ul class="submit-row">
         {% if show_delete_link %}<li class="grp-float-left delete-link-container"><a href="delete/" class="grp-button grp-delete-link">{% trans "Delete" %}</a></li>{% endif %}
+
         {% comment %}
         This is the custom bit to support FSM based transitions. Iterate over the
         available transitions and add appropriate values that are then detected

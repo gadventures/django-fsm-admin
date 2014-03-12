@@ -53,14 +53,14 @@ class PublishableModel(models.Model):
 
     def has_display_dates(self):
         return self.display_from and self.display_until
-    has_display_dates.error_message = 'Display dates are required to expire a page.'
+    has_display_dates.hint = 'Display dates are required to expire a page.'
 
     def can_display(self):
         '''
         The display dates must be valid for the current date
         '''
         return self.check_displayable(timezone.now())
-    can_display.error_message = 'The display dates require updates'
+    can_display.hint = 'The display dates may need to be adjusted.'
 
     def is_expired(self):
         return self.state == State.EXPIRED

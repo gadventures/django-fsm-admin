@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
 from django.utils.translation import ugettext as _
@@ -15,8 +17,17 @@ class FSMTransitionMixin(object):
     * The change_form.html must be overriden to use the custom submit
       row template (on a model or global level).
 
-          {% load fsm_workflow %}
+          {% load fsm_admin %}
           {% block submit_buttons_bottom %}{% fsm_submit_row %}{% endblock %}
+
+    * To optionally display hints to the user about what's needed
+      to transition to other states that aren't available due to unmet
+      pre-conditions, add this to the change_form as well:
+
+          {% block after_field_sets %}
+              {{ block.super }}
+              {% fsm_transition_hints %}
+          {% endblock %}
 
     * There must be one and only one FSMField on the model.
     * There must be a corresponding model function to run the transition,
@@ -109,3 +120,38 @@ class FSMTransitionMixin(object):
             action_flag=CHANGE,
             change_message='Changed state from {0} to {1}'.format(original_state, new_state),
         )
+
+    def get_transition_hints(self, obj):
+        '''
+        See `fsm_transition_hints` templatetag.
+        '''
+        hints = defaultdict(list)
+        transitions = self._get_possible_transitions(obj)
+
+        # Step through the conditions needed to accomplish the legal state
+        # transitions, and alert the user of any missing condition.
+        # TODO?: find a cleaner way to enumerate conditions methods?
+        for action in transitions:
+            for condition in action._django_fsm.conditions.values()[0]:
+
+                # If the condition is valid, then we don't need the hint
+                if condition(obj):
+                    continue
+
+                hint = getattr(condition, 'hint', '')
+                if hint:
+                    hints[action.func_name].append(hint)
+
+        return dict(hints)
+
+    def _get_possible_transitions(self, obj):
+        '''
+        Get valid state transitions from the current state of `obj`
+        '''
+        transitions = []
+        fsmfield = obj._meta.get_field_by_name(self.fsm_field)[0]
+        for action in fsmfield.transitions:
+            for source in action._django_fsm.transitions:
+                if source == getattr(obj, self.fsm_field):
+                    transitions.append(action)
+        return transitions
