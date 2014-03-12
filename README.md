@@ -14,29 +14,30 @@ Or from github:
 
 ## Usage
 
-Add `fsm_admin` to your INSTALLED_APPS
+1. Add `fsm_admin` to your INSTALLED_APPS
 
-In your admin.py file:
+2. In your admin.py file, use the mixin to add behaviour to your ModelAdmin.
 
-    from fsm_admin.mixins import FSMTransitionMixin
+        from fsm_admin.mixins import FSMTransitionMixin
 
-    class YourModelAdmin(FSMTransitionMixin, admin.ModelAdmin):
-        pass
+        class YourModelAdmin(FSMTransitionMixin, admin.ModelAdmin):
+            pass
 
-    admin.site.register(PublishableModel, PublishableModelAdmin)
+        admin.site.register(PublishableModel, PublishableModelAdmin)
 
-Override the admin change_form.html for your model
-(your_app/templates/admin/your_app/your_model/change_form.html)
+3. Override the admin change_form.html for your model
 
-    {% extends 'admin/change_form.html' %}
-    {% load fsm_admin %} 
+        {% extends 'admin/change_form.html' %}
+        {% load fsm_admin %}
 
-    {% block submit_buttons_bottom %}{% fsm_submit_row %}{% endblock %}
+        {% block submit_buttons_bottom %}{% fsm_submit_row %}{% endblock %}
 
-    {% block after_field_sets %}
-        {{ block.super }}
-        {% block transition_hints %}{% fsm_transition_hints %}{% endblock %}
-    {% endblock %}  
+        {% block after_field_sets %}
+            {{ block.super }}
+            {% fsm_transition_hints %}
+        {% endblock %}  
+
+(e.g. `your_app/templates/admin/your_app/your_model/change_form.html`)
 
 ## Try the example
 
