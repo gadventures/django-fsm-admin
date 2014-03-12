@@ -1,8 +1,8 @@
 
 # django-fsm-admin
 
-Mixin and template tags to integrate django-fsm state transitions into 
-the django admin.
+Mixin and template tags to integrate [django-fsm](https://github.com/kmmbvnr/django-fsm)
+state transitions into the django admin.
 
 ## Usage
 
