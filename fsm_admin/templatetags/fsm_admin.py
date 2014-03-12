@@ -1,0 +1,37 @@
+from django import template
+from django.contrib.admin.templatetags.admin_modify import submit_row
+from django.conf import settings
+
+register = template.Library()
+
+import logging
+logger = logging.getLogger(__name__)
+
+FSM_SUBMIT_LINE_TEMPLATE = 'fsm_admin/fsm_submit_line.html'
+if 'grappelli' in settings.INSTALLED_APPS:
+    FSM_SUBMIT_LINE_TEMPLATE = 'fsm_admin/fsm_submit_line_grappelli.html'
+
+
+@register.inclusion_tag(FSM_SUBMIT_LINE_TEMPLATE, takes_context=True)
+def fsm_submit_row(context):
+    '''
+    Additional context added to an overridded submit row that adds links
+    to change the state of an FSMField.
+    '''
+    original = context.get('original', None)
+    model_name = original.__class__._meta.verbose_name if original else ''
+
+    def button_name(name):
+        return '{} {}'.format(name.replace('_', ' '), model_name).title()
+
+    # The model admin defines which field we're dealing with
+    # and has some utils for getting the transitions.
+    model_admin = context.get('adminform').model_admin
+    transitions = model_admin._fsm_get_transitions(original)
+
+    ctx = submit_row(context)
+    # Make the function name the button title, but prettier
+    ctx['transitions'] = [(button_name(func.func_name), func.func_name) for target, func in transitions]
+    ctx['perms'] = context['perms']
+
+    return ctx
