@@ -30,9 +30,11 @@ Override the admin change_form.html for your model
 
 ## Try the example
 
+    git clone git@github.com:gadventures/django-fsm-admin.git
+    cd django-fsm-admin
     mkvirtualenv fsm_admin
-    python setup.py develop
-    cd example
     pip install -r requirements.txt
+    python fsm_admin/setup.py develop
+    cd example
     ./manage.py syncdb
     ./manage.py runserver
