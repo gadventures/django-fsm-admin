@@ -4,7 +4,17 @@
 Mixin and template tags to integrate [django-fsm](https://github.com/kmmbvnr/django-fsm)
 state transitions into the django admin.
 
+## Installation
+
+    $ pip install django-fsm-admin
+
+Or from github:
+
+    $ pip install -e git://github.com/gadventures/django-fsm-admin.git#egg=django-fsm-admin
+
 ## Usage
+
+Add `fsm_admin` to your INSTALLED_APPS
 
 In your admin.py file:
 
@@ -38,3 +48,7 @@ Override the admin change_form.html for your model
     cd example
     ./manage.py syncdb
     ./manage.py runserver
+
+## Demo
+
+[![Watch a QuickCast of the django-fsm-admin example](http://i.imgur.com/IJuE9Sr.png)](http://quick.as/aq8fogo)
