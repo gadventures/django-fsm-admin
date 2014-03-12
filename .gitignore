@@ -4,3 +4,4 @@ dist
 docs/_build
 *.pyc
 .DS_Store
+db.sqlite3
