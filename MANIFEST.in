@@ -1,0 +1,3 @@
+include README.md
+include MIT-LICENSE.txt
+recursive-include fsm_admin/templates *
