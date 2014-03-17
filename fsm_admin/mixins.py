@@ -85,7 +85,12 @@ class FSMTransitionMixin(object):
 
         if available and trans_func:
             # Run the transition
-            trans_func()
+            try:
+                #Attempt to pass in the by argument if using django-fsm-log
+                trans_func(by=request.user)
+            except TypeError:
+                #If the function does not have a by attribute, just call with no arguments
+                trans_func()
 
             # The transition may not be marked to automatically save, so
             # we assume that it should always be saved.
