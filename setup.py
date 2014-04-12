@@ -11,4 +11,16 @@ setup(name='django-fsm-admin',
         'Django>=1.6',
         'django-fsm>=1.5.1',
     ],
+    keywords='django',
+    license='MIT License',
+    platforms=['any'],
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Web Environment',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Framework :: Django',
+    ]
 )
