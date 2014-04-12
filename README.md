@@ -16,7 +16,7 @@ Or from github:
 
 1. Add `fsm_admin` to your INSTALLED_APPS
 
-2. In your admin.py file, use the mixin to add behaviour to your ModelAdmin.
+2. In your admin.py file, use `FSMTransitionMixin` to add behaviour to your ModelAdmin.
 
         from fsm_admin.mixins import FSMTransitionMixin
 
