@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='django-fsm-admin',
-    version='0.0.4',
+    version='0.0.5',
     author='G Adventures',
     author_email='software@gadventures.com',
     url='https://github.com/gadventures/django-fsm-admin',
