@@ -95,7 +95,7 @@ class FSMTransitionMixin(object):
             # The transition may not be marked to automatically save, so
             # we assume that it should always be saved.
             obj.save()
-            new_state = obj.state
+            new_state = getattr(obj, self.fsm_field)
 
             # Done! Log the change and message user
             self.log_state_change(obj, request.user.id, original_state, new_state)
