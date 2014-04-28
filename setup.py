@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='django-fsm-admin',
-    version='0.0.5',
+    version='1.0.0',
     author='G Adventures',
     author_email='software@gadventures.com',
     url='https://github.com/gadventures/django-fsm-admin',
@@ -9,7 +9,7 @@ setup(name='django-fsm-admin',
     include_package_data=True,
     install_requires=[
         'Django>=1.6',
-        'django-fsm>=1.5.1',
+        'django-fsm>=2.0.0',
     ],
     keywords='django',
     license='MIT License',

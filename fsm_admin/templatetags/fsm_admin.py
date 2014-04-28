@@ -31,7 +31,7 @@ def fsm_submit_row(context):
 
     ctx = submit_row(context)
     # Make the function name the button title, but prettier
-    ctx['transitions'] = [(button_name(func.func_name), func.func_name) for target, func in transitions]
+    ctx['transitions'] = [(button_name(t.name), t.name) for t in transitions]
     ctx['perms'] = context['perms']
 
     return ctx

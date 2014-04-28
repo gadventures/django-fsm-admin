@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-from django_fsm.db.fields import FSMField, transition
+from django_fsm import FSMField, transition
 
 
 class State(object):

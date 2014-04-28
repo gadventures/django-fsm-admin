@@ -80,7 +80,7 @@ class FSMTransitionMixin(object):
 
         # Ensure the requested transition is availble
         transitions = self._fsm_get_transitions(obj)
-        available = any([func.func_name == transition for target, func in transitions])
+        available = any([t.name == transition for t in transitions])
         trans_func = getattr(obj, transition, None)
 
         if available and trans_func:
@@ -136,8 +136,8 @@ class FSMTransitionMixin(object):
         # Step through the conditions needed to accomplish the legal state
         # transitions, and alert the user of any missing condition.
         # TODO?: find a cleaner way to enumerate conditions methods?
-        for action in transitions:
-            for condition in action._django_fsm.conditions.values()[0]:
+        for transition in transitions:
+            for condition in transition.conditions:
 
                 # If the condition is valid, then we don't need the hint
                 if condition(obj):
@@ -145,7 +145,7 @@ class FSMTransitionMixin(object):
 
                 hint = getattr(condition, 'hint', '')
                 if hint:
-                    hints[action.func_name].append(hint)
+                    hints[transition.name].append(hint)
 
         return dict(hints)
 
@@ -153,10 +153,5 @@ class FSMTransitionMixin(object):
         '''
         Get valid state transitions from the current state of `obj`
         '''
-        transitions = []
         fsmfield = obj._meta.get_field_by_name(self.fsm_field)[0]
-        for action in fsmfield.transitions:
-            for source in action._django_fsm.transitions:
-                if source == getattr(obj, self.fsm_field):
-                    transitions.append(action)
-        return transitions
+        return fsmfield.get_all_transitions(self.model)
