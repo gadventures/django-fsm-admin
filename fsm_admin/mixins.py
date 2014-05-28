@@ -154,4 +154,7 @@ class FSMTransitionMixin(object):
         Get valid state transitions from the current state of `obj`
         '''
         fsmfield = obj._meta.get_field_by_name(self.fsm_field)[0]
-        return fsmfield.get_all_transitions(self.model)
+        transitions = fsmfield.get_all_transitions(self.model)
+        for transition in transitions:
+            if transition.source in [obj.state, '*']:
+                yield transition
