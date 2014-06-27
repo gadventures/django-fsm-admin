@@ -156,5 +156,5 @@ class FSMTransitionMixin(object):
         fsmfield = obj._meta.get_field_by_name(self.fsm_field)[0]
         transitions = fsmfield.get_all_transitions(self.model)
         for transition in transitions:
-            if transition.source in [obj.state, '*']:
+            if transition.source in [getattr(obj, self.fsm_field), '*']:
                 yield transition
