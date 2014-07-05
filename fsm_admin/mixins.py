@@ -140,7 +140,7 @@ class FSMTransitionMixin(object):
             object_id=obj.pk,
             object_repr=force_unicode(obj),
             action_flag=CHANGE,
-            change_message='Changed state from {0} to {1}'.format(original_state, new_state),
+            change_message='Changed {} from {} to {}'.format(self.fsm_field_instance.verbose_name, original_state, new_state),
         )
 
     def get_transition_hints(self, obj):
