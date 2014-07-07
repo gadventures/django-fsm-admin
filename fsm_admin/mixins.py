@@ -58,6 +58,23 @@ class FSMTransitionMixin(object):
         """
         return request.path
 
+    @property
+    def fsm_field_instance(self):
+        """
+        Returns the actual state field instance, as opposed to
+        fsm_field attribute representing just the field name.
+        """
+        return self.model._meta.get_field_by_name(self.fsm_field)[0]
+
+    def display_fsm_field(self, obj):
+        """
+        Makes sure get_FOO_display() is used for choices-based FSM fields.
+        """
+        if self.fsm_field_instance.choices:
+            return getattr(obj, 'get_%s_display' % self.fsm_field)()
+        else:
+            return getattr(obj, self.fsm_field)
+
     def response_change(self, request, obj):
         '''
         Override of `ModelAdmin.response_change` to detect the FSM button
@@ -72,7 +89,7 @@ class FSMTransitionMixin(object):
 
         # Extract the function name from the transition key
         transition = transition_key[0].split('-')[1]
-        original_state = getattr(obj, self.fsm_field)
+        original_state = self.display_fsm_field(obj)
         msg_dict = {
             'obj': force_text(obj),
             'transition': transition,
@@ -95,7 +112,7 @@ class FSMTransitionMixin(object):
             # The transition may not be marked to automatically save, so
             # we assume that it should always be saved.
             obj.save()
-            new_state = getattr(obj, self.fsm_field)
+            new_state = self.display_fsm_field(obj)
 
             # Done! Log the change and message user
             self.log_state_change(obj, request.user.id, original_state, new_state)
@@ -123,7 +140,7 @@ class FSMTransitionMixin(object):
             object_id=obj.pk,
             object_repr=force_unicode(obj),
             action_flag=CHANGE,
-            change_message='Changed state from {0} to {1}'.format(original_state, new_state),
+            change_message='Changed {} from {} to {}'.format(self.fsm_field_instance.verbose_name, original_state, new_state),
         )
 
     def get_transition_hints(self, obj):
