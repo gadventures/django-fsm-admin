@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from django import template
 from django.contrib.admin.templatetags.admin_modify import submit_row
 from django.conf import settings
@@ -14,10 +16,10 @@ if 'grappelli' in settings.INSTALLED_APPS:
 
 @register.inclusion_tag(FSM_SUBMIT_LINE_TEMPLATE, takes_context=True)
 def fsm_submit_row(context):
-    '''
+    """
     Additional context added to an overridded submit row that adds links
     to change the state of an FSMField.
-    '''
+    """
     original = context.get('original', None)
     model_name = original.__class__._meta.verbose_name if original else ''
 
