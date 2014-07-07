@@ -12,7 +12,7 @@ from django.http import HttpResponseRedirect
 
 
 class FSMTransitionMixin(object):
-    '''
+    """
     Mixin to use with `admin.ModelAdmin` to support transitioning
     a model from one state to another (workflow style).
 
@@ -38,18 +38,18 @@ class FSMTransitionMixin(object):
       in the submit row will not be available.
     * In the absence of specific transition permissions, the user must
       have change permission for the model.
-    '''
+    """
 
     # name of the FSMField on the model to transition
     fsm_field = 'state'
 
     def _fsm_get_transitions(self, obj, perms=None):
-        '''
+        """
         Gets a list of transitions available to the user.
 
         Available state transitions are provided by django-fsm
         following the pattern get_available_FIELD_transitions
-        '''
+        """
         transitions_func = 'get_available_{}_transitions'.format(self.fsm_field)
         transitions = getattr(obj, transitions_func)() if obj else []
         return transitions
@@ -78,10 +78,10 @@ class FSMTransitionMixin(object):
             return getattr(obj, self.fsm_field)
 
     def response_change(self, request, obj):
-        '''
+        """
         Override of `ModelAdmin.response_change` to detect the FSM button
         that was clicked in the submit row and perform the state transtion.
-        '''
+        """
         # Each transition button is named with the transition.
         # e.g. _fsmtransition-publish
         #      _fsmtransition-delete
@@ -133,9 +133,9 @@ class FSMTransitionMixin(object):
         return HttpResponseRedirect(redirect_url)
 
     def log_state_change(self, obj, user_id, original_state, new_state):
-        '''
+        """
         Log the transition of the object to the history.
-        '''
+        """
         LogEntry.objects.log_action(
             user_id=user_id,
             content_type_id=ContentType.objects.get_for_model(obj.__class__).pk,
@@ -146,9 +146,9 @@ class FSMTransitionMixin(object):
         )
 
     def get_transition_hints(self, obj):
-        '''
+        """
         See `fsm_transition_hints` templatetag.
-        '''
+        """
         hints = defaultdict(list)
         transitions = self._get_possible_transitions(obj)
 
@@ -169,9 +169,9 @@ class FSMTransitionMixin(object):
         return dict(hints)
 
     def _get_possible_transitions(self, obj):
-        '''
+        """
         Get valid state transitions from the current state of `obj`
-        '''
+        """
         fsmfield = obj._meta.get_field_by_name(self.fsm_field)[0]
         transitions = fsmfield.get_all_transitions(self.model)
         for transition in transitions:
