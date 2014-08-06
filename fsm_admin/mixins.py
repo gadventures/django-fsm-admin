@@ -42,6 +42,7 @@ class FSMTransitionMixin(object):
 
     # name of the FSMField on the model to transition
     fsm_field = 'state'
+    change_form_template = 'fsm_admin/change_form.html'
 
     def _fsm_get_transitions(self, obj, perms=None):
         """

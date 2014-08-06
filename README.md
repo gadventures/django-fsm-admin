@@ -25,20 +25,6 @@ Or from github:
 
         admin.site.register(PublishableModel, PublishableModelAdmin)
 
-3. Override the admin change_form.html for your model
-
-        {% extends 'admin/change_form.html' %}
-        {% load fsm_admin %}
-
-        {% block submit_buttons_bottom %}{% fsm_submit_row %}{% endblock %}
-
-        {% block after_field_sets %}
-            {{ block.super }}
-            {% fsm_transition_hints %}
-        {% endblock %}  
-
-(e.g. `your_app/templates/admin/your_app/your_model/change_form.html`)
-
 ## Try the example
 
     git clone git@github.com:gadventures/django-fsm-admin.git
