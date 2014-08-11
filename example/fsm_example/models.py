@@ -106,7 +106,8 @@ class PublishableModel(models.Model):
         Revert to the approved state
         '''
 
-    @transition(field=state, source=State.DRAFT, target=State.APPROVED)
+    @transition(field=state, source=State.DRAFT, target=State.APPROVED,
+                custom={'button_name':'Approve'})
     def approve(self):
         '''
         After reviewed by stakeholders, the Page is approved.
