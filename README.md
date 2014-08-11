@@ -23,7 +23,7 @@ Or from github:
         class YourModelAdmin(FSMTransitionMixin, admin.ModelAdmin):
             pass
 
-        admin.site.register(PublishableModel, PublishableModelAdmin)
+        admin.site.register(YourModel, YourModelAdmin)
 
 ## Try the example
 
