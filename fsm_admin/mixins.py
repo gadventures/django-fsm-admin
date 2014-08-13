@@ -51,7 +51,7 @@ class FSMTransitionMixin(object):
         Available state transitions are provided by django-fsm
         following the pattern get_available_FIELD_transitions
         """
-        transitions_func = 'get_available_{}_transitions'.format(self.fsm_field)
+        transitions_func = 'get_available_{0}_transitions'.format(self.fsm_field)
         transitions = getattr(obj, transitions_func)() if obj else []
         return transitions
 
@@ -143,7 +143,7 @@ class FSMTransitionMixin(object):
             object_id=obj.pk,
             object_repr=force_unicode(obj),
             action_flag=CHANGE,
-            change_message='Changed {} from {} to {}'.format(self.fsm_field_instance.verbose_name, original_state, new_state),
+            change_message='Changed {0} from {1} to {2}'.format(self.fsm_field_instance.verbose_name, original_state, new_state),
         )
 
     def get_transition_hints(self, obj):
