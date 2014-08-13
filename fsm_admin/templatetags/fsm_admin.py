@@ -28,7 +28,7 @@ def fsm_submit_row(context):
         if hasattr(transition, 'custom') and 'button_name' in transition.custom:
             return transition.custom['button_name']
         else:
-            return '{} {}'.format(transition.name.replace('_',' '), model_name).title()
+            return '{0} {1}'.format(transition.name.replace('_',' '), model_name).title()
 
     # The model admin defines which field we're dealing with
     # and has some utils for getting the transitions.
