@@ -1,3 +1,4 @@
 include README.md
 include MIT-LICENSE.txt
 recursive-include fsm_admin *
+recursive-exclude fsm_admin *.pyc

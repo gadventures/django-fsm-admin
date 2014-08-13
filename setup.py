@@ -1,8 +1,24 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import os
+import sys
 from setuptools import setup, find_packages
 
-setup(name='django-fsm-admin',
-    version='1.0.4',
-    author='G Adventures',
+import fsm_admin
+
+if sys.argv[-1] == 'publish':
+    os.system('python setup.py sdist upload')
+    sys.exit()
+
+with open('README.rst') as f:
+    readme = f.read()
+
+setup(
+    name='django-fsm-admin',
+    version=fsm_admin.__version__,
+    author=fsm_admin.__author__,
+    description='Integrate django-fsm state transitions into the django admin',
+    long_description=readme,
     author_email='software@gadventures.com',
     url='https://github.com/gadventures/django-fsm-admin',
     packages=find_packages(),
