@@ -101,18 +101,22 @@ class FSMTransitionMixin(object):
         redirect_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
         return HttpResponseRedirect(redirect_url)
 
-    def _transition_is_available(self, obj, transition):
+    def _is_transition_available(self, obj, transition):
         """
-        Check if the requested transition is available
+        Checks if the requested transition is available
         """
-        transitions = self._fsm_get_transitions(obj)
-        return any([t.name == transition for t in transitions])
+        return transition in (t.name for t in self._fsm_get_transitions(obj))
 
-    def _get_transition_keys(self, request):
-        return [k for k in request.POST.keys() if k.startswith(self.fsm_input_prefix)]
+    def _get_requested_transition(self, request):
+        """
+        Extracts the name of the transition requested by user
+        """
+        for key in request.POST.keys():
+            if key.startswith(self.fsm_input_prefix):
+                return key.split('-')[1]
+        return None
 
-    def _transition(self, transition_keys, request, obj, form):
-        transition = transition_keys[0].split('-')[1]
+    def _do_transition(self, transition, request, obj, form):
         original_state = self.display_fsm_field(obj)
         msg_dict = {
             'obj': force_text(obj),
@@ -120,15 +124,15 @@ class FSMTransitionMixin(object):
             'original_state': original_state,
         }
         # Ensure the requested transition is available
-        available = self._transition_is_available(obj, transition)
+        available = self._is_transition_available(obj, transition)
         trans_func = getattr(obj, transition, None)
         if available and trans_func:
             # Run the transition
             try:
-                #Attempt to pass in the by argument if using django-fsm-log
+                # Attempt to pass in the by argument if using django-fsm-log
                 trans_func(by=request.user)
             except TypeError:
-                #If the function does not have a by attribute, just call with no arguments
+                # If the function does not have a by attribute, just call with no arguments
                 trans_func()
             new_state = self.display_fsm_field(obj)
 
@@ -144,10 +148,10 @@ class FSMTransitionMixin(object):
         setattr(obj, '_fsmtransition_results', msg_dict)
 
     def save_model(self, request, obj, form, change):
-        transition_keys = self._get_transition_keys(request)
-        if transition_keys:
-            self._transition(transition_keys, request, obj, form)
-        obj.save()
+        transition = self._get_requested_transition(request)
+        if transition:
+            self._do_transition(transition, request, obj, form)
+        super(FSMTransitionMixin, self).save_model(request, obj, form, change)
 
     def get_transition_hints(self, obj):
         """
