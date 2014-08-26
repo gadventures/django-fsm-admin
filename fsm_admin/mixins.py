@@ -100,7 +100,7 @@ class FSMTransitionMixin(object):
         }
 
         # Ensure the requested transition is availble
-        transitions = self._fsm_get_transitions(obj)
+        transitions = self._fsm_get_transitions(obj, request)
         available = any([t.name == transition for t in transitions])
         trans_func = getattr(obj, transition, None)
 
