@@ -32,8 +32,9 @@ def fsm_submit_row(context):
 
     # The model admin defines which field we're dealing with
     # and has some utils for getting the transitions.
+    request = context['request']
     model_admin = context.get('adminform').model_admin
-    transitions = model_admin._fsm_get_transitions(original)
+    transitions = model_admin._fsm_get_transitions(original,request)
 
     ctx = submit_row(context)
     # Make the function name the button title, but prettier

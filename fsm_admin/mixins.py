@@ -44,15 +44,16 @@ class FSMTransitionMixin(object):
     fsm_field = 'state'
     change_form_template = 'fsm_admin/change_form.html'
 
-    def _fsm_get_transitions(self, obj, perms=None):
+    def _fsm_get_transitions(self, obj, request, perms=None):
         """
         Gets a list of transitions available to the user.
 
         Available state transitions are provided by django-fsm
         following the pattern get_available_FIELD_transitions
         """
-        transitions_func = 'get_available_{}_transitions'.format(self.fsm_field)
-        transitions = getattr(obj, transitions_func)() if obj else []
+        user = request.user
+        transitions_func = 'get_available_user_{0}_transitions'.format(self.fsm_field)
+        transitions = getattr(obj, transitions_func)(user) if obj else []
         return transitions
 
     def get_redirect_url(self, request, obj):
