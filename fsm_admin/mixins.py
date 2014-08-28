@@ -45,7 +45,7 @@ class FSMTransitionMixin(object):
     fsm_field = 'state'
     change_form_template = 'fsm_admin/change_form.html'
 
-    def _fsm_get_transitions(self, obj, perms=None):
+    def _fsm_get_transitions(self, obj, request, perms=None):
         """
         Gets a list of transitions available to the user.
 
