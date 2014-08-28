@@ -45,15 +45,16 @@ class FSMTransitionMixin(object):
     fsm_field = 'state'
     change_form_template = 'fsm_admin/change_form.html'
 
-    def _fsm_get_transitions(self, obj, perms=None):
+    def _fsm_get_transitions(self, obj, request, perms=None):
         """
         Gets a list of transitions available to the user.
 
         Available state transitions are provided by django-fsm
         following the pattern get_available_FIELD_transitions
         """
-        transitions_func = 'get_available_{0}_transitions'.format(self.fsm_field)
-        transitions = getattr(obj, transitions_func)() if obj else []
+        user = request.user
+        transitions_func = 'get_available_user_{0}_transitions'.format(self.fsm_field)
+        transitions = getattr(obj, transitions_func)(user) if obj else []
         return transitions
 
     def get_redirect_url(self, request, obj):
@@ -101,11 +102,11 @@ class FSMTransitionMixin(object):
         redirect_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
         return HttpResponseRedirect(redirect_url)
 
-    def _is_transition_available(self, obj, transition):
+    def _is_transition_available(self, obj, transition, request):
         """
         Checks if the requested transition is available
         """
-        return transition in (t.name for t in self._fsm_get_transitions(obj))
+        return transition in (t.name for t in self._fsm_get_transitions(obj, request))
 
     def _get_requested_transition(self, request):
         """
@@ -124,7 +125,7 @@ class FSMTransitionMixin(object):
             'original_state': original_state,
         }
         # Ensure the requested transition is available
-        available = self._is_transition_available(obj, transition)
+        available = self._is_transition_available(obj, transition, request)
         trans_func = getattr(obj, transition, None)
         if available and trans_func:
             # Run the transition
