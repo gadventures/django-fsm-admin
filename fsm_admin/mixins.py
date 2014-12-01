@@ -37,12 +37,12 @@ class FSMTransitionMixin(object):
     * In the absence of specific transition permissions, the user must
       have change permission for the model.
     """
-    # Each transition input is named with the transition.
-    # e.g. _fsmtransition-publish
-    #      _fsmtransition-delete
+    # Each transition input is named with the state field and transition.
+    # e.g. _fsmtransition-publish_state-publish
+    #      _fsmtransition-revision_state-delete
     fsm_input_prefix = '_fsmtransition'
-    # name of the FSMField on the model to transition
-    fsm_field = 'state'
+    # The name of one or more FSMFields on the model to transition
+    fsm_field = ['state',]
     change_form_template = 'fsm_admin/change_form.html'
 
     def _fsm_get_transitions(self, obj, request, perms=None):
@@ -53,8 +53,13 @@ class FSMTransitionMixin(object):
         following the pattern get_available_FIELD_transitions
         """
         user = request.user
-        transitions_func = 'get_available_user_{0}_transitions'.format(self.fsm_field)
-        transitions = getattr(obj, transitions_func)(user) if obj else []
+        fsm_fields = self._get_fsm_field_list()
+
+        transitions = {}
+        for field in fsm_fields:
+            transitions_func = 'get_available_user_{0}_transitions'.format(field)
+            transitions[field] = getattr(obj, transitions_func)(user) if obj else []
+
         return transitions
 
     def get_redirect_url(self, request, obj):
@@ -63,22 +68,22 @@ class FSMTransitionMixin(object):
         """
         return request.path
 
-    @property
-    def fsm_field_instance(self):
+    def fsm_field_instance(self, fsm_field_name):
         """
         Returns the actual state field instance, as opposed to
         fsm_field attribute representing just the field name.
         """
-        return self.model._meta.get_field_by_name(self.fsm_field)[0]
+        return self.model._meta.get_field_by_name(fsm_field_name)[0]
 
-    def display_fsm_field(self, obj):
+    def display_fsm_field(self, obj, fsm_field_name):
         """
         Makes sure get_FOO_display() is used for choices-based FSM fields.
         """
-        if self.fsm_field_instance.choices:
-            return getattr(obj, 'get_%s_display' % self.fsm_field)()
+        field_instance = self.fsm_field_instance(fsm_field_name)
+        if field_instance and field_instance.choices:
+            return getattr(obj, 'get_%s_display' % fsm_field_name)()
         else:
-            return getattr(obj, self.fsm_field)
+            return getattr(obj, fsm_field_name)
 
     def response_change(self, request, obj):
         """
@@ -106,7 +111,10 @@ class FSMTransitionMixin(object):
         """
         Checks if the requested transition is available
         """
-        return transition in (t.name for t in self._fsm_get_transitions(obj, request))
+        transitions = []
+        for field, field_transitions in self._fsm_get_transitions(obj, request).iteritems():
+            transitions += [t.name for t in field_transitions]
+        return transitions
 
     def _get_requested_transition(self, request):
         """
@@ -114,11 +122,12 @@ class FSMTransitionMixin(object):
         """
         for key in request.POST.keys():
             if key.startswith(self.fsm_input_prefix):
-                return key.split('-')[1]
+                fsm_input = key.split('-')
+                return (fsm_input[1], fsm_input[2])
         return None
 
-    def _do_transition(self, transition, request, obj, form):
-        original_state = self.display_fsm_field(obj)
+    def _do_transition(self, transition, request, obj, form, fsm_field_name):
+        original_state = self.display_fsm_field(obj, fsm_field_name)
         msg_dict = {
             'obj': force_text(obj),
             'transition': transition,
@@ -135,11 +144,11 @@ class FSMTransitionMixin(object):
             except TypeError:
                 # If the function does not have a by attribute, just call with no arguments
                 trans_func()
-            new_state = self.display_fsm_field(obj)
+            new_state = self.display_fsm_field(obj, fsm_field_name)
 
             # Mark the fsm_field as changed in the form so it will be
             # picked up when the change message is constructed
-            form.changed_data.append(self.fsm_field)
+            form.changed_data.append(fsm_field_name)
 
             msg_dict.update({'new_state': new_state, 'status': messages.SUCCESS})
         else:
@@ -149,9 +158,9 @@ class FSMTransitionMixin(object):
         setattr(obj, '_fsmtransition_results', msg_dict)
 
     def save_model(self, request, obj, form, change):
-        transition = self._get_requested_transition(request)
+        fsm_field, transition = self._get_requested_transition(request)
         if transition:
-            self._do_transition(transition, request, obj, form)
+            self._do_transition(transition, request, obj, form, fsm_field)
         super(FSMTransitionMixin, self).save_model(request, obj, form, change)
 
     def get_transition_hints(self, obj):
@@ -181,8 +190,22 @@ class FSMTransitionMixin(object):
         """
         Get valid state transitions from the current state of `obj`
         """
-        fsmfield = obj._meta.get_field_by_name(self.fsm_field)[0]
-        transitions = fsmfield.get_all_transitions(self.model)
-        for transition in transitions:
-            if transition.source in [getattr(obj, self.fsm_field), '*']:
-                yield transition
+        fsm_fields = self._get_fsm_field_list()
+        for field in fsm_fields:
+            fsmfield = obj._meta.get_field_by_name(field)[0]
+            transitions = fsmfield.get_all_transitions(self.model)
+            for transition in transitions:
+                if transition.source in [getattr(obj, field), '*']:
+                    yield transition
+
+    def _get_fsm_field_list(self):
+        """
+        Ensure backward compatibility by converting a single fsm field to
+        a list.  While we are guaranteeing compatibility we should use
+        this method to retrieve the fsm field rather than directly
+        accessing the property.
+        """
+        if not isinstance(self.fsm_field, (list, tuple,)):
+            return [self.fsm_field,]
+
+        return self.fsm_field
