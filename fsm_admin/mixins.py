@@ -124,7 +124,7 @@ class FSMTransitionMixin(object):
             if key.startswith(self.fsm_input_prefix):
                 fsm_input = key.split('-')
                 return (fsm_input[1], fsm_input[2])
-        return None
+        return None, None
 
     def _do_transition(self, transition, request, obj, form, fsm_field_name):
         original_state = self.display_fsm_field(obj, fsm_field_name)
