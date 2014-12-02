@@ -1,4 +1,4 @@
-{% load i18n admin_urls %}
+{% load i18n admin_urls fsm_admin %}
 <div class="submit-row">
 {% if show_save %}<input type="submit" value="{% trans 'Save' %}" class="default" name="_save" />{% endif %}
 {% if show_delete_link %}
@@ -10,8 +10,8 @@
 {% if show_save_and_add_another %}<input type="submit" value="{% trans 'Save and add another' %}" name="_addanother" />{% endif %}
 {% if show_save_and_continue %}<input type="submit" value="{% trans 'Save and continue editing' %}" name="_continue" />{% endif %}
  
-{% for transition_name, transition in transitions %}
-<input type="submit" value="{{ transition_name }}" class="default transition-{{ transition }}" name="_fsmtransition-{{ transition }}"/>
+{% for transition in transitions %}
+{% fsm_submit_button transition %}
 {% endfor %}
 
 </div>
