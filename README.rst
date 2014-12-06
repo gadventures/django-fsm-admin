@@ -24,7 +24,9 @@ Usage
 -----
 1. Add ``fsm_admin`` to your INSTALLED_APPS
 
-2. In your ``admin.py`` file, use `FSMTransitionMixin` to add behaviour to your ModelAdmin.
+2. Ensure that you have "django.core.context_processors.request" in your TEMPLATE_CONTEXT_PROCESSORS in Django settings
+
+3. In your ``admin.py`` file, use `FSMTransitionMixin` to add behaviour to your ModelAdmin.
 
 ::
     
