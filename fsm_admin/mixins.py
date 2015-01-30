@@ -112,7 +112,7 @@ class FSMTransitionMixin(object):
         Checks if the requested transition is available
         """
         transitions = []
-        for field, field_transitions in self._fsm_get_transitions(obj, request).iteritems():
+        for field, field_transitions in iter(self._fsm_get_transitions(obj, request).items()):
             transitions += [t.name for t in field_transitions]
         return transitions
 
