@@ -57,7 +57,7 @@ def fsm_submit_row(context):
 
     ctx = submit_row(context)
     ctx['transitions'] = []
-    for field,field_transitions in transitions.iteritems():
+    for field,field_transitions in iter(transitions.items()):
         ctx['transitions'] += [(field, button_name(t), t.name) for t in field_transitions]
     ctx['perms'] = context['perms']
 
