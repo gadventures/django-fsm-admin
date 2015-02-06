@@ -34,13 +34,18 @@ Usage
 
 
 3. In your ``admin.py`` file, use `FSMTransitionMixin` to add behaviour to your ModelAdmin.
+FSMTransitionMixin should be before `ModelAdmin`, the order is important.
+
+It assumes that your workflow state field is named `state` but you can override it
+or add additional workflow state fields with the attribute `fsm_field`
 
 ::
-    
+
     from fsm_admin.mixins import FSMTransitionMixin
 
     class YourModelAdmin(FSMTransitionMixin, admin.ModelAdmin):
-        pass
+        # The name of one or more FSMFields on the model to transition
+        fsm_field = ['wf_state',]
 
         admin.site.register(YourModel, YourModelAdmin)
 
