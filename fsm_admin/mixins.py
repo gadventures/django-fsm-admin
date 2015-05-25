@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from collections import defaultdict
 
+from django.conf import settings
 from django.contrib import messages
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_text
@@ -44,6 +45,7 @@ class FSMTransitionMixin(object):
     # The name of one or more FSMFields on the model to transition
     fsm_field = ['state',]
     change_form_template = 'fsm_admin/change_form.html'
+    default_disallow_transition = not getattr(settings, 'FSM_ADMIN_FORCE_PERMIT', False)
 
     def _fsm_get_transitions(self, obj, request, perms=None):
         """
@@ -58,8 +60,8 @@ class FSMTransitionMixin(object):
         transitions = {}
         for field in fsm_fields:
             transitions_func = 'get_available_user_{0}_transitions'.format(field)
-            transitions[field] = getattr(obj, transitions_func)(user) if obj else []
-
+            transitions_generator = getattr(obj, transitions_func)(user) if obj else []
+            transitions[field] = self._filter_admin_transitions(transitions_generator)
         return transitions
 
     def get_redirect_url(self, request, obj):
@@ -115,6 +117,25 @@ class FSMTransitionMixin(object):
         for field, field_transitions in iter(self._fsm_get_transitions(obj, request).items()):
             transitions += [t.name for t in field_transitions]
         return transitions
+
+    def _filter_admin_transitions(self, transitions_generator):
+        """
+        Filter the given list of transitions, if their transition methods are declared as admin
+        transitions. To allow a transition inside fsm_admin, add the parameter
+        `admin=True` to the transition decorator, for example:
+        ```
+        @transition(field='state', source=['startstate'], target='finalstate', custom=dict(admin=True))
+        def do_something(self):
+            ...
+        ```
+
+        If the configuration setting `FSM_ADMIN_FORCE_PERMIT = True` then only transitions with
+        `custom=dict(admin=True)` are allowed. Otherwise, if `FSM_ADMIN_FORCE_PERMIT = False` or
+        unset only those with `custom=dict(admin=False)`
+        """
+        for transition in transitions_generator:
+            if transition.custom.get('admin', self.default_disallow_transition):
+                yield transition
 
     def _get_requested_transition(self, request):
         """
