@@ -56,6 +56,7 @@ parameters without default values, since in **django-fsm-admin** no arguments ca
 transition method.
 
 ::
+
         @transition(field='state', source=['startstate'], target='finalstate', custom=dict(admin=False))
         def do_something(self, some_param):
             # will not add a button "Do Something" to your admin model interface
