@@ -17,9 +17,6 @@ if 'grappelli' in settings.INSTALLED_APPS:
 if 'suit' in settings.INSTALLED_APPS:
     FSM_SUBMIT_BUTTON_TEMPLATE = 'fsm_admin/fsm_submit_button_suit.html'
     FSM_SUBMIT_LINE_TEMPLATE = 'fsm_admin/fsm_submit_line_suit.html'
-if 'wpadmin' in settings.INSTALLED_APPS:
-    FSM_SUBMIT_BUTTON_TEMPLATE = 'fsm_admin/fsm_submit_button_wpadmin.html'
-    FSM_SUBMIT_LINE_TEMPLATE = 'fsm_admin/fsm_submit_line_wpadmin.html'
 
 
 @register.inclusion_tag(FSM_SUBMIT_BUTTON_TEMPLATE)
