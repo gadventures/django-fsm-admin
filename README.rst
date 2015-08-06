@@ -24,7 +24,8 @@ Usage
 -----
 1. Add ``fsm_admin`` to your INSTALLED_APPS
 
-2. Ensure that you have "django.core.context_processors.request" in your TEMPLATE_CONTEXT_PROCESSORS in Django settings. If TEMPLATE_CONTEXT_PROCESSORS is not yet defined, add
+2. Ensure that you have "django.core.context_processors.request" in your TEMPLATE_CONTEXT_PROCESSORS
+in Django settings. If TEMPLATE_CONTEXT_PROCESSORS is not yet defined, add
 ::
     from django.conf import global_settings
 
@@ -48,6 +49,32 @@ or add additional workflow state fields with the attribute `fsm_field`
         fsm_field = ['wf_state',]
 
         admin.site.register(YourModel, YourModelAdmin)
+
+4. By adding ``custom=dict(admin=False)`` to the transition decorator, one can disallow a transition
+to show up in the admin interface. This specially is useful, if the transition method accepts
+parameters without default values, since in **django-fsm-admin** no arguments can be passed into the
+transition method.
+
+::
+
+        @transition(field='state', source=['startstate'], target='finalstate', custom=dict(admin=False))
+        def do_something(self, some_param):
+            # will not add a button "Do Something" to your admin model interface
+
+By adding ``FSM_ADMIN_FORCE_PERMIT = True`` to your configuration settings, the above restriction
+becomes the default. Then one must explicitly allow that a transition method shows up in the
+admin interface.
+
+::
+
+        @transition(field='state', source=['startstate'], target='finalstate', custom=dict(admin=True))
+        def proceed(self):
+            # will add a button "Proceed" to your admin model interface
+
+
+This is useful, if most of your state transitions are handled by other means, such as external
+events communicating with the API of your application.
+
 
 Try the example
 ---------------
