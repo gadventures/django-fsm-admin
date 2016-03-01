@@ -160,11 +160,15 @@ class FSMTransitionMixin(object):
         if available and trans_func:
             # Run the transition
             try:
-                # Attempt to pass in the by argument if using django-fsm-log
-                trans_func(by=request.user)
+                # Attempt to pass in the request and by argument if using django-fsm-log
+                trans_func(request=request, by=request.user)
             except TypeError:
-                # If the function does not have a by attribute, just call with no arguments
-                trans_func()
+                try:
+                    # Attempt to pass in the by argument if using django-fsm-log
+                    trans_func(by=request.user)
+                except TypeError:
+                    # If the function does not have a by attribute, just call with no arguments
+                    trans_func()
             new_state = self.display_fsm_field(obj, fsm_field_name)
 
             # Mark the fsm_field as changed in the form so it will be
