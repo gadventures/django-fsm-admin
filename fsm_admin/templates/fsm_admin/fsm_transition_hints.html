@@ -1,6 +1,8 @@
+{% load i18n %}
+
 {% if transition_hints %}
   <div class="module aligned">
-    <h2>Hints in order to...</h2>
+    <h2>{% trans "Hints in order to..." %}</h2>
 
     {% for action, hints in transition_hints.items %}
         {% for hint in hints %}
@@ -15,4 +17,4 @@
         {% endfor %}
     {% endfor %}
   </div>
-{% endif %} 
+{% endif %}
