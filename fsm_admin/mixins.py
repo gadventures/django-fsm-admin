@@ -207,7 +207,11 @@ class FSMTransitionMixin(object):
 
                 hint = getattr(condition, 'hint', '')
                 if hint:
-                    hints[transition.name].append(hint)
+                    if hasattr(transition, 'custom') and transition.custom.get(
+                            'button_name'):
+                        hints[transition.custom['button_name']].append(hint)
+                    else:
+                        hints[transition.name].append(hint)
 
         return dict(hints)
 
