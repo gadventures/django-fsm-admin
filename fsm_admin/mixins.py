@@ -211,7 +211,7 @@ class FSMTransitionMixin(object):
                             'button_name'):
                         hints[transition.custom['button_name']].append(hint)
                     else:
-                        hints[transition.name].append(hint)
+                        hints[transition.name.title()].append(hint)
 
         return dict(hints)
 
