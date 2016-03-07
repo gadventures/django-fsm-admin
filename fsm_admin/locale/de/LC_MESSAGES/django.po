@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-fsm-admin\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-29 08:43+0100\n"
+"POT-Creation-Date: 2016-03-05 10:21+0100\n"
 "PO-Revision-Date: 2016-02-29 08:43+0100\n"
 "Last-Translator: Jonas von Poser <code@vonposer.de>\n"
 "Language: \n"
@@ -24,4 +24,9 @@ msgstr "%(obj)s erfolgreich auf Status \"%(new_state)s\" gesetzt"
 #: mixins.py:101
 #, python-format
 msgid "Error! %(obj)s failed to %(transition)s"
-msgstr "Fehler! %(obj)s konnte nicht auf Status \"%(transition)s\" gesetzt werden"
+msgstr ""
+"Fehler! %(obj)s konnte nicht auf Status \"%(transition)s\" gesetzt werden"
+
+#: templates/fsm_admin/fsm_transition_hints.html:5
+msgid "Hints in order to..."
+msgstr "Hinweise, um Aktionen auszulösen"
