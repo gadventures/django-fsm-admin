@@ -1,0 +1,28 @@
+{% load i18n %}
+
+{% if transition_hints %}
+  <fieldset class="module aligned with-legend ">
+    <h2 class="legend">{% trans "Hints in order to..." %}</h2>
+
+    {% for action, hints in transition_hints.items %}
+        {% for hint in hints %}
+            {% if forloop.first %}
+            <div class="control-group form-row field-first_name ">
+              <div>
+                 <div class="control-label">
+                   <label>{{ action }}</label>
+                 </div>
+                 <div class="controls">
+                   <p>
+            {% endif %}
+                     {{ hint }}
+            {% if forloop.last %}
+                   </p>
+                 </div>
+               </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+  </fieldset>
+{% endif %}
