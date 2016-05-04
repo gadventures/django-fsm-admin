@@ -116,7 +116,7 @@ class FSMTransitionMixin(object):
         transitions = []
         for field, field_transitions in iter(self._fsm_get_transitions(obj, request).items()):
             transitions += [t.name for t in field_transitions]
-        return transitions
+        return transition in transitions
 
     def _filter_admin_transitions(self, transitions_generator):
         """
