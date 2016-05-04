@@ -11,12 +11,14 @@ logger = logging.getLogger(__name__)
 
 FSM_SUBMIT_BUTTON_TEMPLATE = 'fsm_admin/fsm_submit_button.html'
 FSM_SUBMIT_LINE_TEMPLATE = 'fsm_admin/fsm_submit_line.html'
+FSM_TRANSITION_HINTS = 'fsm_admin/fsm_transition_hints.html'
 if 'grappelli' in settings.INSTALLED_APPS:
     FSM_SUBMIT_BUTTON_TEMPLATE = 'fsm_admin/fsm_submit_button_grappelli.html'
     FSM_SUBMIT_LINE_TEMPLATE = 'fsm_admin/fsm_submit_line_grappelli.html'
 if 'suit' in settings.INSTALLED_APPS:
     FSM_SUBMIT_BUTTON_TEMPLATE = 'fsm_admin/fsm_submit_button_suit.html'
     FSM_SUBMIT_LINE_TEMPLATE = 'fsm_admin/fsm_submit_line_suit.html'
+    FSM_TRANSITION_HINTS = 'fsm_admin/fsm_transition_hints_suit.html'
 if 'wpadmin' in settings.INSTALLED_APPS:
     FSM_SUBMIT_BUTTON_TEMPLATE = 'fsm_admin/fsm_submit_button_wpadmin.html'
     FSM_SUBMIT_LINE_TEMPLATE = 'fsm_admin/fsm_submit_line_wpadmin.html'
@@ -68,7 +70,7 @@ def fsm_submit_row(context):
     return ctx
 
 
-@register.inclusion_tag('fsm_admin/fsm_transition_hints.html', takes_context=True)
+@register.inclusion_tag(FSM_TRANSITION_HINTS, takes_context=True)
 def fsm_transition_hints(context):
     """
     Displays hints about why a state transition might not be applicable for
