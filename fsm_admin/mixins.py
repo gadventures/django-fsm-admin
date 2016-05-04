@@ -116,7 +116,7 @@ class FSMTransitionMixin(object):
         transitions = []
         for field, field_transitions in iter(self._fsm_get_transitions(obj, request).items()):
             transitions += [t.name for t in field_transitions]
-        return transitions
+        return transition in transitions
 
     def _filter_admin_transitions(self, transitions_generator):
         """
@@ -203,6 +203,10 @@ class FSMTransitionMixin(object):
 
                 # If the condition is valid, then we don't need the hint
                 if condition(obj):
+                    continue
+
+                # if the transition is hidden, we don't need the hint
+                if transition.custom.get('admin', self.default_disallow_transition):
                     continue
 
                 hint = getattr(condition, 'hint', '')
