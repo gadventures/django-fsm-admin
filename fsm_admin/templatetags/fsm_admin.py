@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
-
+import logging
 from django import template
 from django.contrib.admin.templatetags.admin_modify import submit_row
 from django.conf import settings
 
 register = template.Library()
 
-import logging
+
 logger = logging.getLogger(__name__)
 
 FSM_SUBMIT_BUTTON_TEMPLATE = 'fsm_admin/fsm_submit_button.html'
@@ -57,7 +57,7 @@ def fsm_submit_row(context):
             return transition.custom['button_name']
         else:
             # Make the function name the button title, but prettier
-            return '{0} {1}'.format(transition.name.replace('_',' '), model_name).title()
+            return '{0} {1}'.format(transition.name.replace('_', ' '), model_name).title()
 
     # The model admin defines which field we're dealing with
     # and has some utils for getting the transitions.
@@ -67,9 +67,11 @@ def fsm_submit_row(context):
 
     ctx = submit_row(context)
     ctx['transitions'] = []
-    for field,field_transitions in iter(transitions.items()):
-        ctx['transitions'] += sorted([(field, button_name(t), t.name) for t in field_transitions],
-                                     key=lambda e: e[1], reverse=True)
+    for field, field_transitions in iter(transitions.items()):
+        ctx['transitions'] += sorted(
+            [(field, button_name(t), t.name) for t in field_transitions],
+            key=lambda e: e[1], reverse=True
+        )
     ctx['perms'] = context['perms']
 
     return ctx
