@@ -45,7 +45,12 @@ def fsm_submit_row(context):
     to change the state of an FSMField.
     """
     original = context.get('original', None)
-    model_name = original.__class__._meta.verbose_name if original else ''
+    model_name = ''
+    if original is not None:
+        if original._deferred:
+            model_name = type(original).__base__._meta.verbose_name
+        else:
+            model_name = original.__class__._meta.verbose_name
 
     def button_name(transition):
         if hasattr(transition, 'custom') and 'button_name' in transition.custom:
