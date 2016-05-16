@@ -43,7 +43,7 @@ class FSMTransitionMixin(object):
     #      _fsmtransition-revision_state-delete
     fsm_input_prefix = '_fsmtransition'
     # The name of one or more FSMFields on the model to transition
-    fsm_field = ['state',]
+    fsm_field = ['state']
     change_form_template = 'fsm_admin/change_form.html'
     default_disallow_transition = not getattr(settings, 'FSM_ADMIN_FORCE_PERMIT', False)
 
@@ -239,6 +239,6 @@ class FSMTransitionMixin(object):
         accessing the property.
         """
         if not isinstance(self.fsm_field, (list, tuple,)):
-            return [self.fsm_field,]
+            return [self.fsm_field]
 
         return self.fsm_field
