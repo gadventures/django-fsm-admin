@@ -1,6 +1,8 @@
 {% extends 'admin/change_form.html' %}
 {% load fsm_admin %}
 
+{% if save_on_top %}{% block submit_buttons_top %}{% fsm_submit_row %}{% endblock %}{% endif %}
+
 {% block submit_buttons_bottom %}{% fsm_submit_row %}{% endblock %}
 
 {% block after_field_sets %}

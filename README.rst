@@ -85,10 +85,10 @@ Try the example
     $ cd django-fsm-admin
     $ mkvirtualenv fsm_admin
     $ pip install -r requirements.txt
-    $ python fsm_admin/setup.py develop
+    $ python setup.py develop
     $ cd example
-    $ ./manage.py syncdb
-    $ ./manage.py runserver
+    $ python manage.py syncdb
+    $ python manage.py runserver
 
 Demo
 ----

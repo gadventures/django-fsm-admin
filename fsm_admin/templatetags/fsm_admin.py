@@ -1,22 +1,24 @@
 from __future__ import unicode_literals
-
+import logging
 from django import template
 from django.contrib.admin.templatetags.admin_modify import submit_row
 from django.conf import settings
 
 register = template.Library()
 
-import logging
+
 logger = logging.getLogger(__name__)
 
 FSM_SUBMIT_BUTTON_TEMPLATE = 'fsm_admin/fsm_submit_button.html'
 FSM_SUBMIT_LINE_TEMPLATE = 'fsm_admin/fsm_submit_line.html'
+FSM_TRANSITION_HINTS = 'fsm_admin/fsm_transition_hints.html'
 if 'grappelli' in settings.INSTALLED_APPS:
     FSM_SUBMIT_BUTTON_TEMPLATE = 'fsm_admin/fsm_submit_button_grappelli.html'
     FSM_SUBMIT_LINE_TEMPLATE = 'fsm_admin/fsm_submit_line_grappelli.html'
 if 'suit' in settings.INSTALLED_APPS:
     FSM_SUBMIT_BUTTON_TEMPLATE = 'fsm_admin/fsm_submit_button_suit.html'
     FSM_SUBMIT_LINE_TEMPLATE = 'fsm_admin/fsm_submit_line_suit.html'
+    FSM_TRANSITION_HINTS = 'fsm_admin/fsm_transition_hints_suit.html'
 if 'wpadmin' in settings.INSTALLED_APPS:
     FSM_SUBMIT_BUTTON_TEMPLATE = 'fsm_admin/fsm_submit_button_wpadmin.html'
     FSM_SUBMIT_LINE_TEMPLATE = 'fsm_admin/fsm_submit_line_wpadmin.html'
@@ -43,14 +45,19 @@ def fsm_submit_row(context):
     to change the state of an FSMField.
     """
     original = context.get('original', None)
-    model_name = original.__class__._meta.verbose_name if original else ''
+    model_name = ''
+    if original is not None:
+        if original._deferred:
+            model_name = type(original).__base__._meta.verbose_name
+        else:
+            model_name = original.__class__._meta.verbose_name
 
     def button_name(transition):
         if hasattr(transition, 'custom') and 'button_name' in transition.custom:
             return transition.custom['button_name']
         else:
             # Make the function name the button title, but prettier
-            return '{0} {1}'.format(transition.name.replace('_',' '), model_name).title()
+            return '{0} {1}'.format(transition.name.replace('_', ' '), model_name).title()
 
     # The model admin defines which field we're dealing with
     # and has some utils for getting the transitions.
@@ -60,15 +67,17 @@ def fsm_submit_row(context):
 
     ctx = submit_row(context)
     ctx['transitions'] = []
-    for field,field_transitions in iter(transitions.items()):
-        ctx['transitions'] += sorted([(field, button_name(t), t.name) for t in field_transitions],
-                                     key=lambda e: e[1], reverse=True)
+    for field, field_transitions in iter(transitions.items()):
+        ctx['transitions'] += sorted(
+            [(field, button_name(t), t.name) for t in field_transitions],
+            key=lambda e: e[1], reverse=True
+        )
     ctx['perms'] = context['perms']
 
     return ctx
 
 
-@register.inclusion_tag('fsm_admin/fsm_transition_hints.html', takes_context=True)
+@register.inclusion_tag(FSM_TRANSITION_HINTS, takes_context=True)
 def fsm_transition_hints(context):
     """
     Displays hints about why a state transition might not be applicable for

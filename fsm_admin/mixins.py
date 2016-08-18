@@ -43,7 +43,7 @@ class FSMTransitionMixin(object):
     #      _fsmtransition-revision_state-delete
     fsm_input_prefix = '_fsmtransition'
     # The name of one or more FSMFields on the model to transition
-    fsm_field = ['state',]
+    fsm_field = ['state']
     change_form_template = 'fsm_admin/change_form.html'
     default_disallow_transition = not getattr(settings, 'FSM_ADMIN_FORCE_PERMIT', False)
 
@@ -116,7 +116,7 @@ class FSMTransitionMixin(object):
         transitions = []
         for field, field_transitions in iter(self._fsm_get_transitions(obj, request).items()):
             transitions += [t.name for t in field_transitions]
-        return transitions
+        return transition in transitions
 
     def _filter_admin_transitions(self, transitions_generator):
         """
@@ -205,9 +205,17 @@ class FSMTransitionMixin(object):
                 if condition(obj):
                     continue
 
+                # if the transition is hidden, we don't need the hint
+                if transition.custom.get('admin', self.default_disallow_transition):
+                    continue
+
                 hint = getattr(condition, 'hint', '')
                 if hint:
-                    hints[transition.name].append(hint)
+                    if hasattr(transition, 'custom') and transition.custom.get(
+                            'button_name'):
+                        hints[transition.custom['button_name']].append(hint)
+                    else:
+                        hints[transition.name.title()].append(hint)
 
         return dict(hints)
 
@@ -231,6 +239,6 @@ class FSMTransitionMixin(object):
         accessing the property.
         """
         if not isinstance(self.fsm_field, (list, tuple,)):
-            return [self.fsm_field,]
+            return [self.fsm_field]
 
         return self.fsm_field
