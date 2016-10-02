@@ -1,15 +1,27 @@
-{% load i18n fsm_admin %}
+{% load i18n admin_urls fsm_admin %}
 <footer class="grp-module grp-submit-row grp-fixed-footer">
+    <header style="display:none"><h1>Submit Options</h1></header>
     <ul class="submit-row">
-        {% if show_delete_link %}<li class="grp-float-left delete-link-container"><a href="delete/" class="grp-button grp-delete-link">{% trans "Delete" %}</a></li>{% endif %}
-        {% if show_save %}<li class="submit-button-container"><input type="submit" value="{% trans 'Save' %}" class="default" name="_save"/></li>{% endif %}
-        {% if show_save_as_new %}<li class="submit-button-container"><input type="submit" value="{% trans 'Save as new' %}" name="_saveasnew"/></li>{% endif %}
-        {% if show_save_and_add_another %}<li class="submit-button-container"><input type="submit" value="{% trans 'Save and add another' %}" name="_addanother"/></li>{% endif %}
-        {% if show_save_and_continue %}<li class="submit-button-container"><input type="submit" value="{% trans 'Save and continue editing' %}" name="_continue"/></li>{% endif %}
- 
+        {% if show_delete_link %}
+            {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
+            <li class="grp-float-left"><a href="{% add_preserved_filters delete_url %}" class="grp-button grp-delete-link">{% trans "Delete" %}</a></li>
+        {% endif %}
+        {% if show_save %}
+            <li><input type="submit" value="{% trans 'Save' %}" class="grp-button grp-default" name="_save" /></li>
+        {% endif %}
+        {% if show_save_as_new %}
+            <li><input type="submit" value="{% trans 'Save as new' %}" class="grp-button" name="_saveasnew" /></li>
+        {% endif %}
+        {% if show_save_and_add_another %}
+            <li><input type="submit" value="{% trans 'Save and add another' %}" class="grp-button" name="_addanother" /></li>
+        {% endif %}
+        {% if show_save_and_continue %}
+            <li><input type="submit" value="{% trans 'Save and continue editing' %}" class="grp-button" name="_continue" /></li>
+        {% endif %}
+
         {% for transition in transitions %}
             {% fsm_submit_button transition %}
         {% endfor %}
- 
+
     </ul><br clear="all" />
 </footer>
