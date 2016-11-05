@@ -75,7 +75,7 @@ class FSMTransitionMixin(object):
         Returns the actual state field instance, as opposed to
         fsm_field attribute representing just the field name.
         """
-        return self.model._meta.get_field_by_name(fsm_field_name)[0]
+        return self.model._meta.get_field(fsm_field_name)
 
     def display_fsm_field(self, obj, fsm_field_name):
         """
@@ -225,7 +225,7 @@ class FSMTransitionMixin(object):
         """
         fsm_fields = self._get_fsm_field_list()
         for field in fsm_fields:
-            fsmfield = obj._meta.get_field_by_name(field)[0]
+            fsmfield = obj._meta.get_field(field)
             transitions = fsmfield.get_all_transitions(self.model)
             for transition in transitions:
                 if transition.source in [getattr(obj, field), '*']:
