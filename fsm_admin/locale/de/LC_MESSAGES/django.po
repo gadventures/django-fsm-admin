@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-fsm-admin\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-03-05 10:21+0100\n"
+"POT-Creation-Date: 2016-06-13 17:38+0200\n"
 "PO-Revision-Date: 2016-02-29 08:43+0100\n"
 "Last-Translator: Jonas von Poser <code@vonposer.de>\n"
 "Language: \n"
@@ -27,6 +27,42 @@ msgid "Error! %(obj)s failed to %(transition)s"
 msgstr ""
 "Fehler! %(obj)s konnte nicht auf Status \"%(transition)s\" gesetzt werden"
 
+#: templates/fsm_admin/fsm_submit_line.html:3
+#: templates/fsm_admin/fsm_submit_line_grappelli.html:5
+#: templates/fsm_admin/fsm_submit_line_suit.html:3
+#: templates/fsm_admin/fsm_submit_line_wpadmin.html:3
+msgid "Save"
+msgstr "Speichern"
+
+#: templates/fsm_admin/fsm_submit_line.html:6
+#: templates/fsm_admin/fsm_submit_line_grappelli.html:4
+#: templates/fsm_admin/fsm_submit_line_suit.html:13
+#: templates/fsm_admin/fsm_submit_line_wpadmin.html:9
+msgid "Delete"
+msgstr "Löschen"
+
+#: templates/fsm_admin/fsm_submit_line.html:9
+#: templates/fsm_admin/fsm_submit_line_grappelli.html:6
+#: templates/fsm_admin/fsm_submit_line_suit.html:5
+#: templates/fsm_admin/fsm_submit_line_wpadmin.html:4
+msgid "Save as new"
+msgstr "Als neu sichern"
+
+#: templates/fsm_admin/fsm_submit_line.html:10
+#: templates/fsm_admin/fsm_submit_line_grappelli.html:7
+#: templates/fsm_admin/fsm_submit_line_suit.html:7
+#: templates/fsm_admin/fsm_submit_line_wpadmin.html:5
+msgid "Save and add another"
+msgstr "Sichern und neu hinzufügen"
+
+#: templates/fsm_admin/fsm_submit_line.html:11
+#: templates/fsm_admin/fsm_submit_line_grappelli.html:8
+#: templates/fsm_admin/fsm_submit_line_suit.html:4
+#: templates/fsm_admin/fsm_submit_line_wpadmin.html:6
+msgid "Save and continue editing"
+msgstr "Sichern und weiter bearbeiten"
+
 #: templates/fsm_admin/fsm_transition_hints.html:5
+#: templates/fsm_admin/fsm_transition_hints_suit.html:5
 msgid "Hints in order to..."
 msgstr "Hinweise, um Aktionen auszulösen"
