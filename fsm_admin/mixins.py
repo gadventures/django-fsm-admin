@@ -206,7 +206,7 @@ class FSMTransitionMixin(object):
                     continue
 
                 # if the transition is hidden, we don't need the hint
-                if transition.custom.get('admin', self.default_disallow_transition):
+                if not transition.custom.get('admin', self.default_disallow_transition):
                     continue
 
                 hint = getattr(condition, 'hint', '')
