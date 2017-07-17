@@ -1,4 +1,4 @@
-{% load i18n fsm_admin %}
+{% load i18n fsm_admin admin_urls suit_tags %}
 <div class="submit-row clearfix">
   {% if show_save %}<button type="submit" class="btn btn-high btn-info" name="_save" {{ onclick_attrib }}>{% trans 'Save' %}</button>{% endif %}
   {% if show_save_and_continue %}<button type="submit" name="_continue" class=" btn btn-high" {{ onclick_attrib }}>{% trans 'Save and continue editing' %}</button>{% endif %}
@@ -10,6 +10,12 @@
         {% fsm_submit_button transition %}
     {% endfor %}
 
-  {% if show_delete_link %}<a href="delete/" class="text-error deletelink">{% trans "Delete" %}</a>
+  {% if show_delete_link %}
+    {% if '1.9'|django_version_lt %}
+      <a href="delete/" class="text-error deletelink">{% trans "Delete" %}</a>
+    {% else %}
+        {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
+        <a href="{% add_preserved_filters delete_url %}" class="text-error deletelink">{% trans "Delete" %}</a>
+    {% endif %}
   {% endif %}
 </div>
