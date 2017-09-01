@@ -90,7 +90,7 @@ class FSMTransitionMixin(object):
     def response_change(self, request, obj):
         """
         Override of `ModelAdmin.response_change` to detect the FSM button
-        that was clicked in the submit row and perform the state transtion.
+        that was clicked in the submit row and perform the state transition.
         """
         if not getattr(obj, '_fsmtransition_results', None):
             return super(FSMTransitionMixin, self).response_change(request, obj)
