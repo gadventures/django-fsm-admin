@@ -9,6 +9,8 @@ from django.utils.encoding import force_text
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.http import HttpResponseRedirect
 
+from django_fsm import ConcurrentTransition
+
 
 class FSMTransitionMixin(object):
     """
@@ -187,6 +189,13 @@ class FSMTransitionMixin(object):
         if transition:
             self._do_transition(transition, request, obj, form, fsm_field)
         super(FSMTransitionMixin, self).save_model(request, obj, form, change)
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        try:
+            return super(FSMTransitionMixin, self).change_view(request, object_id, form_url, extra_context)
+        except ConcurrentTransition as err:
+            messages.error(request, err)
+            return HttpResponseRedirect(request.path)
 
     def get_transition_hints(self, obj):
         """
