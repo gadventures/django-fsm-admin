@@ -7,3 +7,6 @@ docs/_build
 db.sqlite3
 *.tmp
 .eggs/
+
+.idea/
+venv/
