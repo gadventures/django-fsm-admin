@@ -111,3 +111,10 @@ class PublishableModel(models.Model):
         '''
         After reviewed by stakeholders, the Page is approved.
         '''
+
+    @transition(field=state, source=State.EXPIRED, target=State.DRAFT)
+    def reactivate(self):
+        '''
+        After being expired, the Page can be reposted .
+        '''
+
