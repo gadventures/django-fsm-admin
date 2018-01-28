@@ -1,6 +1,10 @@
+from pprint import pprint
+
 from django.db import models
+from django.dispatch.dispatcher import receiver
 from django.utils import timezone
-from django_fsm import FSMField, transition
+from django_fsm import FSMField, transition, GET_STATE, RETURN_VALUE, ConcurrentTransitionMixin
+from django_fsm.signals import pre_transition
 
 from .utils import ModelEnum
 
@@ -13,11 +17,15 @@ class State(ModelEnum):
     EXPIRED = 'EXPIRED'        # Period for which the model is set to display has passed
     DELETED = 'DELETED'        # Soft delete state
 
+    REJECTED = 'REJECTED'                   # Rejection state
+    FOR_MODERATORS = 'FOR_MODERATORS'       # Moderators reviewing state
+
     @classmethod
     def get_states__accessible_by_employee(cls):
-        """An employee can access the only if the post.state is not State.DELETED"""
+        """An employee can access the only if the post.state is not State.DELETED and State.FOR_MODERATORS"""
         return [state.value for index, state in enumerate(cls.get_all_members())
-                if state.name not in [State.DELETED]]
+                if state.name not in [State.DELETED,
+                                      State.FOR_MODERATORS]]
 
     @classmethod
     def get_states__previously_published(cls):
@@ -33,7 +41,7 @@ class State(ModelEnum):
         return [state.value for index, state in enumerate(relevant_states)]
 
 
-class PublishableModel(models.Model):
+class PublishableModel(ConcurrentTransitionMixin, models.Model):
 
     name = models.CharField(max_length=42, blank=False)
 
@@ -122,9 +130,32 @@ class PublishableModel(models.Model):
         After reviewed by stakeholders, the Page is approved.
         """
 
-    @transition(field=state, source=State.EXPIRED.value, target=State.DRAFT.value)
+    @transition(field=state, source=State.EXPIRED.value, target=State.DRAFT.value, custom=dict(admin=True))
     def reactivate(self):
         """
         Even after expiring, the page can be re-posted.
         """
+
+    @transition(field=state,
+                source='*',
+                target=RETURN_VALUE(State.FOR_MODERATORS.value,
+                                    State.PUBLISHED.value))
+    def moderators_saw(self, is_public=True):
+        return State.FOR_MODERATORS.value if is_public else State.PUBLISHED.value
+
+    @transition(
+        field=state,
+        source=State.FOR_MODERATORS.value,
+        target=GET_STATE(
+            lambda instance: State.PUBLISHED.value if instance.allowed else State.REJECTED.value,
+            states=[State.PUBLISHED.value,
+                    State.REJECTED.value]))
+    def moderate(self, allowed=False):
+        self.allowed = allowed
+
+
+@receiver(pre_transition, sender=PublishableModel)
+def printing(instance, *args, **kwargs):
+    print "Saving state for:", instance, args
+    pprint(kwargs)
 
