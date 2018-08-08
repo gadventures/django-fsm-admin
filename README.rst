@@ -48,7 +48,7 @@ or add additional workflow state fields with the attribute `fsm_field`
         # The name of one or more FSMFields on the model to transition
         fsm_field = ['wf_state',]
 
-        admin.site.register(YourModel, YourModelAdmin)
+    admin.site.register(YourModel, YourModelAdmin)
 
 4. By adding ``custom=dict(admin=False)`` to the transition decorator, one can disallow a transition
 to show up in the admin interface. This specially is useful, if the transition method accepts
