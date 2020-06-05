@@ -48,6 +48,8 @@ class FSMTransitionMixin(object):
     fsm_field = ['state']
     change_form_template = 'fsm_admin/change_form.html'
     default_disallow_transition = not getattr(settings, 'FSM_ADMIN_FORCE_PERMIT', False)
+    success_message_template = _('%(obj)s successfully set to %(new_state)s')
+    error_message_template = _('Error! %(obj)s failed to %(transition)s')
 
     def _fsm_get_transitions(self, obj, request, perms=None):
         """
@@ -98,9 +100,9 @@ class FSMTransitionMixin(object):
             return super(FSMTransitionMixin, self).response_change(request, obj)
 
         if obj._fsmtransition_results['status'] == messages.SUCCESS:
-            msg = _('%(obj)s successfully set to %(new_state)s') % obj._fsmtransition_results
+            msg = self.success_message_template % obj._fsmtransition_results
         else:
-            msg = _('Error! %(obj)s failed to %(transition)s') % obj._fsmtransition_results
+            msg = self.error_message_template % obj._fsmtransition_results
 
         self.message_user(request, msg, obj._fsmtransition_results['status'])
 
