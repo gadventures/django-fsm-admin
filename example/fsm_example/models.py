@@ -83,16 +83,26 @@ class PublishableModel(models.Model):
     ########################################################
     # Workflow (state) Transitions
 
-    @transition(field=state, source=[State.APPROVED, State.EXPIRED],
+    @transition(
+        field=state, 
+        source=[State.APPROVED, State.EXPIRED],
         target=State.PUBLISHED,
-        conditions=[can_display])
+        conditions=[can_display],
+        # Display a button in the admin to trigger the state change. Name it Publish 
+        custom=dict(admin=True, button_name="Publish"),
+    )
     def publish(self):
         '''
         Publish the object.
         '''
 
-    @transition(field=state, source=State.PUBLISHED, target=State.EXPIRED,
-        conditions=[has_display_dates])
+    @transition(
+        field=state, 
+        source=State.PUBLISHED, 
+        target=State.EXPIRED,
+        conditions=[has_display_dates], 
+        # Display a button in the admin with default name : transition_name + model name (expire publishable model)
+        custom=dict(admin=True))
     def expire(self):
         '''
         Automatically called when a object is detected as being not
