@@ -6,7 +6,7 @@ all:
 	@echo
 
 version:
-	@echo " fsm_admim.__version__ = $(VERSION)\n"
+	@echo "fsm_admim.__version__ == $(VERSION)"
 
 help:
 	@echo " Make targets"
@@ -17,7 +17,7 @@ help:
 	@echo " * dist        - package"
 	@echo " * help        - print this targets list"
 	@echo " * release     - package and upload a release"
-	@echo " * version     - print the current value of reports.__version__"
+	@echo " * version     - print the current value of fsm_admin.__version__"
 	@echo
 
 clean: clean-build clean-pyc
