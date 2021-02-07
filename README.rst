@@ -24,8 +24,8 @@ Usage
 
 1. Add ``fsm_admin`` to your ``INSTALLED_APPS``.
 
-2. Ensure that you have "django.core.context_processors.request" in your
-   ``TEMPLATE_CONTEXT_PROCESSORS` in Django settings. If the setting variable
+2. Ensure that you have ``"django.core.context_processors.request"`` in your
+   ``TEMPLATE_CONTEXT_PROCESSORS`` in Django settings. If the setting variable
    is not yet defined, add:
 
 .. code:: python
@@ -33,11 +33,11 @@ Usage
    from django.conf import settings
 
    TEMPLATE_CONTEXT_PROCESSORS = settings.TEMPLATE_CONTEXT_PROCESSORS + (
-       'django.core.context_processors.request',
+       "django.core.context_processors.request",
    )
 
-3. In your ``admin.py`` file, use `FSMTransitionMixin` to add behaviour to your
-   ModelAdmin. FSMTransitionMixin should be before `ModelAdmin`, the order is
+3. In your ``admin.py`` file, use ``FSMTransitionMixin`` to add behaviour to your
+   ModelAdmin. ``FSMTransitionMixin`` should be before ``ModelAdmin``, the order is
    important.
 
 It assumes that your workflow state field is named ``state``, however you can
@@ -57,7 +57,7 @@ override it or add additional workflow state fields with the attribute
 4. By adding ``custom=dict(admin=False)`` to the transition decorator, one can
    disallow a transition to show up in the admin interface. This specially is
    useful, if the transition method accepts parameters without default values,
-   since in **django-fsm-admin** no arguments can be passed into th transition
+   since in **django-fsm-admin** no arguments can be passed into the transition
    method.
 
 .. code:: python
