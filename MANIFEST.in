@@ -1,4 +1,6 @@
-include README.md
-include MIT-LICENSE.txt
-recursive-include fsm_admin *
+include README.rst
+include LICENSE
+
 recursive-exclude fsm_admin *.pyc
+
+recursive-include fsm_admin *
