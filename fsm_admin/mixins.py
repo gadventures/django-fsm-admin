@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.contrib import messages
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.utils.encoding import force_text
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.http import HttpResponseRedirect
