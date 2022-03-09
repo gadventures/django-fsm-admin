@@ -31,11 +31,12 @@ def fsm_submit_button(transition):
     Render a submit button that requests an fsm state transition for a
     single state.
     """
-    fsm_field_name, button_value, transition_name = transition
+    fsm_field_name, button_value, transition_name, foreign_key = transition
     return {
         'button_value': button_value,
         'fsm_field_name': fsm_field_name,
         'transition_name': transition_name,
+        'foreign_key': foreign_key,
     }
 
 
@@ -50,7 +51,9 @@ def fsm_submit_row(context):
     if original is not None:
         # TODO: replace the following line by `original is models.DEFERRED`
         # after dropping support for Django-1.9
-        if getattr(original, '_deferred', False) or original is getattr(models, 'DEFERRED', None):
+        if getattr(original, '_deferred', False) or original is getattr(
+            models, 'DEFERRED', None
+        ):
             model_name = type(original).__base__._meta.verbose_name
         else:
             model_name = original.__class__._meta.verbose_name
@@ -60,7 +63,9 @@ def fsm_submit_row(context):
             return transition.custom['button_name']
         else:
             # Make the function name the button title, but prettier
-            return '{0} {1}'.format(transition.name.replace('_', ' '), model_name).title()
+            return '{0} {1}'.format(
+                transition.name.replace('_', ' '), model_name
+            ).title()
 
     # The model admin defines which field we're dealing with
     # and has some utils for getting the transitions.
@@ -70,10 +75,17 @@ def fsm_submit_row(context):
 
     ctx = submit_row(context)
     ctx['transitions'] = []
-    for field, field_transitions in iter(transitions.items()):
+    for field_path, field_transitions in iter(transitions.items()):
+        if '.' in field_path:
+            [foreign_key, field] = field_path.split('.')
+        else:
+            field = field_path
+            foreign_key = ''
+
         ctx['transitions'] += sorted(
-            [(field, button_name(t), t.name) for t in field_transitions],
-            key=lambda e: e[1], reverse=True
+            [(field, button_name(t), t.name, foreign_key) for t in field_transitions],
+            key=lambda e: e[1],
+            reverse=True,
         )
     ctx['perms'] = context['perms']
 
@@ -91,6 +103,4 @@ def fsm_transition_hints(context):
         return {}
 
     model_admin = context.get('adminform').model_admin
-    return {
-        'transition_hints': model_admin.get_transition_hints(original)
-    }
+    return {'transition_hints': model_admin.get_transition_hints(original)}

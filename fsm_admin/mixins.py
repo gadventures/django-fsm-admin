@@ -9,7 +9,7 @@ from django.utils.encoding import force_text
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.http import HttpResponseRedirect
 
-from django_fsm import ConcurrentTransition
+from django_fsm import ConcurrentTransition, FSMField
 
 
 class FSMTransitionMixin(object):
@@ -40,6 +40,7 @@ class FSMTransitionMixin(object):
     * In the absence of specific transition permissions, the user must
       have change permission for the model.
     """
+
     # Each transition input is named with the state field and transition.
     # e.g. _fsmtransition-publish_state-publish
     #      _fsmtransition-revision_state-delete
@@ -48,8 +49,12 @@ class FSMTransitionMixin(object):
     fsm_field = ['state']
     change_form_template = 'fsm_admin/change_form.html'
     default_disallow_transition = not getattr(settings, 'FSM_ADMIN_FORCE_PERMIT', False)
+    # Transitions on related models are used to display transitions
+    # Exemple: Car has a 1-to-1 with Color. Color has a transition, then if we add
+    # 'color' to fsm_foreign_keys, Color transitions will be displayed in Car admin
+    fsm_foreign_keys: list[str] = []
 
-    def _fsm_get_transitions(self, obj, request, perms=None):
+    def _fsm_get_transition_for_object(self, obj, request, perms=None, path=''):
         """
         Gets a list of transitions available to the user.
 
@@ -57,13 +62,40 @@ class FSMTransitionMixin(object):
         following the pattern get_available_FIELD_transitions
         """
         user = request.user
-        fsm_fields = self._get_fsm_field_list()
+        fsm_fields = self._get_fsm_field_list(obj)
 
         transitions = {}
+
         for field in fsm_fields:
             transitions_func = 'get_available_user_{0}_transitions'.format(field)
             transitions_generator = getattr(obj, transitions_func)(user) if obj else []
-            transitions[field] = self._filter_admin_transitions(transitions_generator)
+            transitions[path + field] = self._filter_admin_transitions(
+                transitions_generator
+            )
+
+        return transitions
+
+    def get_instance_or_related_model(self, obj, foreign_key):
+        return getattr(obj, foreign_key) if foreign_key else obj
+
+    def _fsm_get_transitions(self, obj, request, perms=None):
+        """
+        Gets a list of transitions available to the user.
+        """
+        # transitions of the current model
+        transitions = self._fsm_get_transition_for_object(obj, request, perms)
+
+        # transitions of related models
+        for field in self.fsm_foreign_keys:
+            foreign_key_instance = self.get_instance_or_related_model(obj, field)
+            if foreign_key_instance:
+                transitions = {
+                    **transitions,
+                    **self._fsm_get_transition_for_object(
+                        foreign_key_instance, request, perms, path=field + '.'
+                    ),
+                }
+
         return transitions
 
     def get_redirect_url(self, request, obj):
@@ -72,18 +104,18 @@ class FSMTransitionMixin(object):
         """
         return request.path
 
-    def fsm_field_instance(self, fsm_field_name):
+    def fsm_field_instance(self, obj, fsm_field_name):
         """
         Returns the actual state field instance, as opposed to
         fsm_field attribute representing just the field name.
         """
-        return self.model._meta.get_field(fsm_field_name)
+        return obj._meta.get_field(fsm_field_name)
 
     def display_fsm_field(self, obj, fsm_field_name):
         """
         Makes sure get_FOO_display() is used for choices-based FSM fields.
         """
-        field_instance = self.fsm_field_instance(fsm_field_name)
+        field_instance = self.fsm_field_instance(obj, fsm_field_name)
         if field_instance and field_instance.choices:
             return getattr(obj, 'get_%s_display' % fsm_field_name)()
         else:
@@ -92,15 +124,21 @@ class FSMTransitionMixin(object):
     def response_change(self, request, obj):
         """
         Override of `ModelAdmin.response_change` to detect the FSM button
-        that was clicked in the submit row and perform the state transition.
+        that was clicked in the submit row and perform the state transtion.
         """
         if not getattr(obj, '_fsmtransition_results', None):
             return super(FSMTransitionMixin, self).response_change(request, obj)
 
         if obj._fsmtransition_results['status'] == messages.SUCCESS:
-            msg = _('%(obj)s successfully set to %(new_state)s') % obj._fsmtransition_results
+            msg = (
+                _('%(obj)s successfully set to %(new_state)s')
+                % obj._fsmtransition_results
+            )
         else:
-            msg = _('Error! %(obj)s failed to %(transition)s') % obj._fsmtransition_results
+            msg = (
+                _('Error! %(obj)s failed to %(transition)s')
+                % obj._fsmtransition_results
+            )
 
         self.message_user(request, msg, obj._fsmtransition_results['status'])
 
@@ -108,7 +146,9 @@ class FSMTransitionMixin(object):
         redirect_url = self.get_redirect_url(request=request, obj=obj)
 
         preserved_filters = self.get_preserved_filters(request)
-        redirect_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+        redirect_url = add_preserved_filters(
+            {'preserved_filters': preserved_filters, 'opts': opts}, redirect_url
+        )
         return HttpResponseRedirect(redirect_url)
 
     def _is_transition_available(self, obj, transition, request):
@@ -116,7 +156,9 @@ class FSMTransitionMixin(object):
         Checks if the requested transition is available
         """
         transitions = []
-        for field, field_transitions in iter(self._fsm_get_transitions(obj, request).items()):
+        for field, field_transitions in iter(
+            self._fsm_get_transitions(obj, request).items()
+        ):
             transitions += [t.name for t in field_transitions]
         return transition in transitions
 
@@ -146,19 +188,28 @@ class FSMTransitionMixin(object):
         for key in request.POST.keys():
             if key.startswith(self.fsm_input_prefix):
                 fsm_input = key.split('-')
-                return (fsm_input[1], fsm_input[2])
-        return None, None
+                return (fsm_input[1], fsm_input[2], fsm_input[3])
+        return None, None, None
 
-    def _do_transition(self, transition, request, obj, form, fsm_field_name):
-        original_state = self.display_fsm_field(obj, fsm_field_name)
+    def _do_transition(
+        self, transition, request, obj, form, fsm_field_name, foreign_key
+    ):
+        # Retrieve foreign key if provided
+        obj_or_foreign_key = self.get_instance_or_related_model(obj, foreign_key)
+
+        original_state = self.display_fsm_field(obj_or_foreign_key, fsm_field_name)
+
         msg_dict = {
-            'obj': force_text(obj),
+            'obj': force_text(obj)
+            + ('' if not foreign_key else ' - ' + force_text(obj_or_foreign_key)),
             'transition': transition,
             'original_state': original_state,
         }
+
         # Ensure the requested transition is available
         available = self._is_transition_available(obj, transition, request)
-        trans_func = getattr(obj, transition, None)
+
+        trans_func = getattr(obj_or_foreign_key, transition, None)
         if available and trans_func:
             # Run the transition
             try:
@@ -171,7 +222,10 @@ class FSMTransitionMixin(object):
                 except TypeError:
                     # If the function does not have a by attribute, just call with no arguments
                     trans_func()
-            new_state = self.display_fsm_field(obj, fsm_field_name)
+            new_state = self.display_fsm_field(obj_or_foreign_key, fsm_field_name)
+
+            if foreign_key:
+                obj_or_foreign_key.save()  # Done by DjangoAdmin for the model in edition only, not foreign key that needs manual saving
 
             # Mark the fsm_field as changed in the form so it will be
             # picked up when the change message is constructed
@@ -185,9 +239,9 @@ class FSMTransitionMixin(object):
         setattr(obj, '_fsmtransition_results', msg_dict)
 
     def save_model(self, request, obj, form, change):
-        fsm_field, transition = self._get_requested_transition(request)
+        fsm_field, transition, foreign_key = self._get_requested_transition(request)
         if transition:
-            self._do_transition(transition, request, obj, form, fsm_field)
+            self._do_transition(transition, request, obj, form, fsm_field, foreign_key)
         super(FSMTransitionMixin, self).save_model(request, obj, form, change)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
@@ -197,7 +251,7 @@ class FSMTransitionMixin(object):
             messages.error(request, err)
             return HttpResponseRedirect(request.path)
 
-    def get_transition_hints(self, obj):
+    def get_transition_hints(self, obj, ignore_admin_custom_field=False):
         """
         See `fsm_transition_hints` templatetag.
         """
@@ -215,13 +269,16 @@ class FSMTransitionMixin(object):
                     continue
 
                 # if the transition is hidden, we don't need the hint
-                if not transition.custom.get('admin', self.default_disallow_transition):
+                if not ignore_admin_custom_field and not transition.custom.get(
+                    'admin', self.default_disallow_transition
+                ):
                     continue
 
                 hint = getattr(condition, 'hint', '')
                 if hint:
                     if hasattr(transition, 'custom') and transition.custom.get(
-                            'button_name'):
+                        'button_name'
+                    ):
                         hints[transition.custom['button_name']].append(hint)
                     else:
                         hints[transition.name.title()].append(hint)
@@ -232,7 +289,7 @@ class FSMTransitionMixin(object):
         """
         Get valid state transitions from the current state of `obj`
         """
-        fsm_fields = self._get_fsm_field_list()
+        fsm_fields = self._get_fsm_field_list(obj)
         for field in fsm_fields:
             fsmfield = obj._meta.get_field(field)
             transitions = fsmfield.get_all_transitions(self.model)
@@ -240,14 +297,13 @@ class FSMTransitionMixin(object):
                 if transition.source in [getattr(obj, field), '*']:
                     yield transition
 
-    def _get_fsm_field_list(self):
-        """
-        Ensure backward compatibility by converting a single fsm field to
-        a list.  While we are guaranteeing compatibility we should use
-        this method to retrieve the fsm field rather than directly
-        accessing the property.
-        """
-        if not isinstance(self.fsm_field, (list, tuple,)):
-            return [self.fsm_field]
-
-        return self.fsm_field
+    def _get_fsm_field_list(self, obj):
+        return list(
+            filter(
+                lambda name: name is not None,
+                [
+                    field.name if isinstance(field, FSMField) else None
+                    for field in obj._meta.fields
+                ],
+            )
+        )
