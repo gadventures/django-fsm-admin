@@ -298,7 +298,7 @@ class FSMTransitionMixin(object):
                     yield transition
 
     def _get_fsm_field_list(self, obj):
-        return list(
+        return [field.name for field in obj._meta.fields if isinstance(field, FSMField)]
             filter(
                 lambda name: name is not None,
                 [
