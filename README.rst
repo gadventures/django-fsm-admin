@@ -4,7 +4,6 @@ django-fsm-admin
 Mixin and template tags to integrate django-fsm_ state transitions into the
 Django Admin.
 
-
 Installation
 ------------
 
@@ -17,7 +16,6 @@ Or from GitHub:
 .. code:: sh
 
    $ pip install -e git://github.com/gadventures/django-fsm-admin.git#egg=django-fsm-admin
-
 
 Usage
 -----
@@ -89,7 +87,6 @@ transition method shows up in the admin interface.
 This is useful, if most of your state transitions are handled by other means,
 such as external events communicating with the API of your application.
 
-
 Try the example
 ---------------
 
@@ -105,15 +102,4 @@ Try the example
    $ python manage.py runserver
 
 
-Demo
-----
-
-Watch a QuickCast_ of the django-fsm-admin example
-
-.. image:: http://i.imgur.com/IJuE9Sr.png
-   :width: 728px
-   :height: 346px
-   :target: QuickCast_
-
-.. _QuickCast: http://quick.as/aq8fogo
 .. _django-fsm: https://github.com/kmmbvnr/django-fsm
