@@ -4,8 +4,8 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.contrib import messages
-from django.utils.translation import ugettext as _
-from django.utils.encoding import force_text
+from django.utils.translation import gettext as _
+from django.utils.encoding import force_str
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.http import HttpResponseRedirect
 
@@ -152,7 +152,7 @@ class FSMTransitionMixin(object):
     def _do_transition(self, transition, request, obj, form, fsm_field_name):
         original_state = self.display_fsm_field(obj, fsm_field_name)
         msg_dict = {
-            'obj': force_text(obj),
+            'obj': force_str(obj),
             'transition': transition,
             'original_state': original_state,
         }
