@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_text
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
@@ -183,6 +184,37 @@ class FSMTransitionMixin(object):
 
         # Attach the results of our transition attempt
         setattr(obj, '_fsmtransition_results', msg_dict)
+
+    def get_form(self, request, obj, *args, **kwargs):
+        """
+        Hook into the form to allow for validation.
+
+        This calls `validate_fsm_state_change` on the form instance in case
+        a transition is about to take place.
+        This will make is show up with the call to the forms `is_valid` in the
+        admin's `changelist_view`.
+        """
+        form = super(FSMTransitionMixin, self).get_form(request, obj,
+                                                        *args, **kwargs)
+        fsm_field, transition = self._get_requested_transition(request)
+        if transition:
+            form._fsm_transition = transition
+
+            def _full_clean(self):
+                super(type(self), self).full_clean()
+                new_state = self._fsm_transition
+                try:
+                    validate = self.instance.validate_fsm_state_change
+                except AttributeError:
+                    pass
+                else:
+                    try:
+                        validate(new_state)
+                    except ValidationError as e:
+                        self._update_errors(e)
+
+            form.full_clean = _full_clean
+        return form
 
     def save_model(self, request, obj, form, change):
         fsm_field, transition = self._get_requested_transition(request)
