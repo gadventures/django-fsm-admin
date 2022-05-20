@@ -1,0 +1,3 @@
+-r requirements.txt
+
+twine  # for dist check/upload
