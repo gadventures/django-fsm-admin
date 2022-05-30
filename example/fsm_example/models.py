@@ -5,14 +5,14 @@ from django_fsm import FSMField, transition
 
 
 class State(object):
-    '''
+    """
     Constants to represent the `state`s of the PublishableModel
-    '''
-    DRAFT = 'draft'            # Early stages of content editing
-    APPROVED = 'approved'      # Ready to be published
-    PUBLISHED = 'published'    # Visible on the website
-    EXPIRED = 'expired'        # Period for which the model is set to display has passed
-    DELETED = 'deleted'        # Soft delete state
+    """
+    DRAFT = 'draft'  # Early stages of content editing
+    APPROVED = 'approved'  # Ready to be published
+    PUBLISHED = 'published'  # Visible on the website
+    EXPIRED = 'expired'  # Period for which the model is set to display has passed
+    DELETED = 'deleted'  # Soft delete state
 
     CHOICES = (
         (DRAFT, DRAFT),
@@ -24,7 +24,6 @@ class State(object):
 
 
 class PublishableModel(models.Model):
-
     name = models.CharField(max_length=42, blank=False)
 
     # One state to rule them all
@@ -43,16 +42,17 @@ class PublishableModel(models.Model):
         verbose_name = 'Post'
         verbose_name_plural = 'Posts'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     ########################################################
     # Transition Conditions
     # These must be defined prior to the actual transitions
-    # to be refrenced.
+    # to be referenced.
 
     def has_display_dates(self):
         return self.display_from and self.display_until
+
     has_display_dates.hint = 'Display dates are required to expire a page.'
 
     def can_display(self):
@@ -60,6 +60,7 @@ class PublishableModel(models.Model):
         The display dates must be valid for the current date
         '''
         return self.check_displayable(timezone.now())
+
     can_display.hint = 'The display dates may need to be adjusted.'
 
     def is_expired(self):
@@ -73,7 +74,7 @@ class PublishableModel(models.Model):
         if not self.has_display_dates():
             return True
 
-        displayable = self.display_from < date and self.display_until > date
+        displayable = self.display_from < date < self.display_until
         # Expired Pages should transition to the expired state
         if not displayable and not self.is_expired:
             self.expire()  # Calling the expire transition
@@ -84,15 +85,15 @@ class PublishableModel(models.Model):
     # Workflow (state) Transitions
 
     @transition(field=state, source=[State.APPROVED, State.EXPIRED],
-        target=State.PUBLISHED,
-        conditions=[can_display])
+                target=State.PUBLISHED,
+                conditions=[can_display])
     def publish(self):
         '''
         Publish the object.
         '''
 
     @transition(field=state, source=State.PUBLISHED, target=State.EXPIRED,
-        conditions=[has_display_dates])
+                conditions=[has_display_dates])
     def expire(self):
         '''
         Automatically called when a object is detected as being not
