@@ -1,12 +1,19 @@
-from django.conf.urls import patterns, include, url
-
 from django.contrib import admin
-admin.autodiscover()
 
-urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'example.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
+try:
+    from django.conf.urls import patterns, include, url
 
-    url(r'^admin/', include(admin.site.urls)),
-)
+    admin.autodiscover()
+
+    urlpatterns = patterns('',
+        # Examples:
+        # url(r'^$', 'example.views.home', name='home'),
+        # url(r'^blog/', include('blog.urls')),
+
+        url(r'^admin/', include(admin.site.urls)),
+    )
+except ImportError:
+    from django.urls import path
+    urlpatterns = [
+        path('admin/', admin.site.urls)
+    ]

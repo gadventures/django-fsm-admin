@@ -7,6 +7,7 @@ from setuptools import setup, find_packages
 import fsm_admin
 
 readme = open("README.rst").read()
+requirements_txt = open('requirements.txt').read()
 
 setup(
     name="django-fsm-admin",
@@ -18,11 +19,7 @@ setup(
     author_email="software@gadventures.com",
     url="https://github.com/gadventures/django-fsm-admin",
     packages=find_packages(),
-    include_package_data=True,
-    install_requires=[
-        "Django>=1.6",
-        "django-fsm>=2.1.0",
-    ],
+    install_requires=requirements_txt.splitlines(False),
     keywords="django fsm admin",
     license="MIT",
     platforms=["any"],
