@@ -2,10 +2,15 @@ from __future__ import unicode_literals
 
 from collections import defaultdict
 
+import django
 from django.conf import settings
 from django.contrib import messages
-from django.utils.translation import ugettext as _
-from django.utils.encoding import force_text
+if django.VERSION < (4, 0):
+    from django.utils.encoding import force_text as force_str
+    from django.utils.translation import ugettext_lazy as _
+else:
+    from django.utils.encoding import force_str
+    from django.utils.translation import gettext_lazy as _
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.http import HttpResponseRedirect
 
@@ -152,7 +157,7 @@ class FSMTransitionMixin(object):
     def _do_transition(self, transition, request, obj, form, fsm_field_name):
         original_state = self.display_fsm_field(obj, fsm_field_name)
         msg_dict = {
-            'obj': force_text(obj),
+            'obj': force_str(obj),
             'transition': transition,
             'original_state': original_state,
         }
