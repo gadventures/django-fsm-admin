@@ -1,1 +1,1 @@
-<button type="submit" class="btn default transition-{{ transition_name }}" name="_fsmtransition-{{ fsm_field_name }}-{{ transition_name }}">{{ button_value }}</button>
+<button type="submit" class="btn default transition-{{ transition_name }}{% if transition_css_classes %} {{ transition_css_classes }}{% endif %}" name="_fsmtransition-{{ fsm_field_name }}-{{ transition_name }}">{{ button_value }}</button>

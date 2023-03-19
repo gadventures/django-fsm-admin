@@ -31,11 +31,12 @@ def fsm_submit_button(transition):
     Render a submit button that requests an fsm state transition for a
     single state.
     """
-    fsm_field_name, button_value, transition_name = transition
+    fsm_field_name, button_value, transition_name, transition_css_classes = transition
     return {
         'button_value': button_value,
         'fsm_field_name': fsm_field_name,
         'transition_name': transition_name,
+        'transition_css_classes': transition_css_classes,
     }
 
 
@@ -62,6 +63,12 @@ def fsm_submit_row(context):
             # Make the function name the button title, but prettier
             return '{0} {1}'.format(transition.name.replace('_', ' '), model_name).title()
 
+    def button_css_classes(transition):
+        if hasattr(transition, 'custom') and 'css_classes' in transition.custom:
+            return transition.custom['css_classes']
+        else:
+            return ""
+
     # The model admin defines which field we're dealing with
     # and has some utils for getting the transitions.
     request = context['request']
@@ -72,7 +79,7 @@ def fsm_submit_row(context):
     ctx['transitions'] = []
     for field, field_transitions in iter(transitions.items()):
         ctx['transitions'] += sorted(
-            [(field, button_name(t), t.name) for t in field_transitions],
+            [(field, button_name(t), t.name, button_css_classes(t)) for t in field_transitions],
             key=lambda e: e[1], reverse=True
         )
     ctx['perms'] = context['perms']
