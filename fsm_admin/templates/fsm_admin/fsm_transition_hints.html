@@ -5,16 +5,12 @@
     <h2>{% trans "Hints in order to..." %}</h2>
 
     {% for action, hints in transition_hints.items %}
-        {% for hint in hints %}
-          <div class="form-row">
-            <div>
-                {% if forloop.first %}
-                  <label><strong>{{ action }}</strong></label>
-                {% endif %}
-                <p>{{ hint }}</p>
-            </div>
-          </div>
-        {% endfor %}
+        <dl>
+            <dt>{{ action }}</dt>
+            {% for hint in hints %}
+                <dd>{{ hint }}</dd>
+            {% endfor %}
+        </dl>
     {% endfor %}
   </div>
 {% endif %}
